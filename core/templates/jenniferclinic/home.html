@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+<body>
+<div id="app">
+    <v-app>
+        <v-main>
+            <template>
+                <v-alert v-if="error"
+                        border="top"
+                        color="red lighten-2"
+                        dark
+                >
+                    An error occured, please verify your token is not expired
+                </v-alert>
+
+                <v-simple-table>
+                    <template v-slot:default>
+                        <thead>
+                        <tr>
+                            <th class="text-left">
+                                ID
+                            </th>
+                            <th class="text-left">
+                                Nb of participants
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr
+                                v-for="(value,key) in meetings"
+                                :key="key"
+                        >
+                            <td>[[ key ]]</td>
+                            <td>[[ value ]]</td>
+                            <td>
+                                <v-btn @click="interrupt_meeting(key)">Interrupt</v-btn>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </template>
+                </v-simple-table>
+            </template>
+
+        </v-main>
+    </v-app>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        vuetify: new Vuetify(),
+        delimiters: ['[[', ']]'],
+
+        data() {
+            return {
+                meetings: null,
+                error:false
+            }
+        },
+        mounted() {
+            axios.get("/api/get_meetings_from_db?refresh=true").then((response) => {
+                this.meetings = response.data
+                console.log(response.data)
+            }).catch(error => {
+                this.error = true;
+                console.log(error);
+            })
+        },
+        methods: {
+            interrupt_meeting(zoom_id) {
+                axios.get("/api/interrupt_meeting/" + zoom_id).then((response) => {
+                    location.reload()
+                    console.log(response.data)
+                }).catch(error => {
+                    this.error = true;
+                    console.log(error);
+                })
+
+            },
+        },
+    })
+
+
+</script>
+</body>
+</html>
